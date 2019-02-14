@@ -1,0 +1,8 @@
+__pycache__/
+.coverage
+.cache
+.DS_Store
+.idea/
+.vscode/
+*.log
+*.pyc
