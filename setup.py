@@ -18,7 +18,11 @@ CLASSIFIERS = [
 KEYWORDS = 'Python Service Clients'
 
 
-deps = ['boto3==1.9.51', 'elasticsearch==6.3.1', 'redis==2.10.6']
+requires = [
+    'boto3>=1.9.0',
+    'elasticsearch>=6.3.1,<7.0.0',
+    'redis>=2.10.6'
+]
 
 # Manage requirements
 setup(
@@ -37,5 +41,5 @@ setup(
     license='BSD',
     classifiers=CLASSIFIERS,
     keywords=KEYWORDS,
-    install_requires=deps
+    install_requires=requires
 )
