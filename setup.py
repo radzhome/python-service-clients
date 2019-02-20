@@ -18,11 +18,11 @@ CLASSIFIERS = [
 KEYWORDS = 'Python Service Clients'
 
 
-deps = ['boto3==1.9.86', 'elasticsearch==6.3.1', 'redis==2.10.6']
+deps = ['boto3==1.9.51', 'elasticsearch==6.3.1', 'redis==2.10.6']
 
 # Manage requirements
 setup(
-    name='serviceclients',
+    name='service_clients',
     include_package_data=True,
     version=service_clients.__version__,
     description=KEYWORDS,
@@ -31,8 +31,8 @@ setup(
     author_email='radek@radtek.com',
     download_url='https://github.com/radzhome/python-service-clients',
     url='https://github.com/radzhome/python-service-clients',
-    packages=['serviceclients', 'serviceclients.aws', 'serviceclients.cache', 'serviceclients.search'],
-    package_dir={'serviceclients': 'serviceclients'},
+    packages=['service_clients', 'service_clients.aws', 'service_clients.cache', 'service_clients.search'],
+    package_dir={'service_clients': 'service_clients'},
     platforms=['Platform Independent'],
     license='BSD',
     classifiers=CLASSIFIERS,

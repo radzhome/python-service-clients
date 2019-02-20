@@ -284,7 +284,6 @@ class TestESClient(unittest.TestCase):
         self.es_client.create_index(index, replace=True)
         assert self.es_client.setup_index(index, mappings, settings) == {u'acknowledged': True}
 
-
     def test_create_index1(self):
         index_name = 'test_es_setup_index'
         success = self.es_client.create_index(index_name)

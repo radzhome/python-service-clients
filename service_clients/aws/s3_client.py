@@ -4,12 +4,10 @@ S3 bucket CRUD operations core module
 """
 import logging
 import time
-import warnings
 
 import boto3
 import botocore
 from botocore.client import Config
-
 
 
 class S3Client:  # pragma: no cover
@@ -172,25 +170,3 @@ class S3Client:  # pragma: no cover
         objects = [{'Key': key} for key in keys]
         self.bucket.delete_objects(Delete={'Objects': objects})
         return True
-
-
-if __name__ == "__main__":  # pragma: nocover
-
-    conf = {'access_key_id': '<test key id>',
-            'secret_access_key': '<test access key>',
-            'aws_region': 'ca-central-1',
-            'bucket_name': 'aws-web-distro'}
-
-    s3_client = S3Client(config=conf)
-
-    print(s3_client.list())
-
-    # s3_client.upload('test2.jpg', '/Users/rad/Desktop/test.jpg')
-
-    print(s3_client.read('readonly-access/readonly.txt'))
-
-    # print(s3_client.write('new-test-key.txt', 'this is some data'))
-
-    print(s3_client.remove(keys=['test.jpg', 'test2.jpg']))
-
-    # s3_client.download('new-test-key.txt', 'my_local_image.jpg')

@@ -153,15 +153,16 @@ class SQSClient:  # pragma: nocover
 
         return sqs_messages
 
-    def delete_message(self, sqs_message):
+    def delete_message(self, sqs_message=None, receipt_handle=None):
         """
         Delete an sqs msg
-        :param sqs_message: str, receipt handle associated with
-            the message to delete.
+        :param sqs_message: dict, message with receipt handle (optional)
+        :param receipt_handle: str, receipt handle associated with
+            the message to delete (optional)
         :return:
         """
         try:
-            receipt_handle = sqs_message['ReceiptHandle']
+            receipt_handle = receipt_handle or sqs_message['ReceiptHandle']
         except KeyError:
             logging.error("SQSClient.delete_message missing 'ReceiptHandle' key in message, required for delete")
             raise
@@ -197,33 +198,3 @@ class SQSClient:  # pragma: nocover
             MessageBody=body,
             DelaySeconds=delay_seconds,
         )
-
-
-if __name__ == "__main__":  # pragma: nocover
-
-    conf = {'access_key_id': '<test key id>',
-            'secret_access_key': '<test access key>',
-            'aws_region': 'ca-central-1',
-            'queue_url': 'https://sqs.ca-central-1.amazonaws.com/<aws_id>/<queue_name>'}
-
-    client = SQSClient(conf, conn_retries=1, msg_wait_seconds=10)
-
-    # Create some messages
-    client.send_message(body={'test': 'body'})
-    client.send_message(body={'test': 'body'})
-
-    msgs = client.get_messages(num_messages=2)
-
-    assert isinstance(msgs, list)
-    assert msgs
-
-    assert len(msgs) >= 1, len(msgs)  # Could be 1 or 2
-    assert isinstance(msgs[0], dict), type(msgs[0])
-
-    is_deleted = [client.delete_message(msg) for msg in msgs]
-    assert all(is_deleted)
-
-    # Clean up all messages
-    while msgs:
-        [client.delete_message(msg) for msg in msgs]
-        msgs = client.get_messages(msg_wait_seconds=1)

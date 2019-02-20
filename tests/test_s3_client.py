@@ -44,7 +44,7 @@ class TestS3Client(unittest.TestCase):
         """Sets up before each test"""
         logging.debug('setting up')
 
-        # Silence some of the errors associated with long lived connections
+        # Silence some of the errors associated with long lived connections, unclosed file buffers
         warnings.filterwarnings("ignore", category=ResourceWarning, message="unclosed.*<ssl.SSLSocket.*>")
         warnings.filterwarnings("ignore", category=ResourceWarning, message="unclosed.*file")
 
