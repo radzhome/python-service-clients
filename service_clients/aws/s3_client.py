@@ -4,10 +4,12 @@ S3 bucket CRUD operations core module
 """
 import logging
 import time
+import warnings
 
 import boto3
 import botocore
 from botocore.client import Config
+
 
 
 class S3Client:  # pragma: no cover

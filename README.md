@@ -9,7 +9,7 @@ Service clients for common aws, cache and search services
 1. Run tests `cd tests && python3 test_es_client.py`
 
 
-# Testing aws modules
+### Testing aws modules
 
 1. Update keys in test_s3_client.py
 1. Run tests `cd tests && python3 test_s3_client.py`
