@@ -19,10 +19,17 @@ KEYWORDS = 'Python Service Clients'
 
 
 requires = [
-    'boto3>=1.9.0',
+    'boto3>=1.9.0,<3.0.0',
     'elasticsearch>=6.3.1,<7.0.0',
-    'redis>=2.10.6'
+    'redis>=2.10.6,<3.0.0'
+
 ]
+
+extra_require = {
+    'rabbit':  ['pika>=1.0.1', ],
+    'boto':  ['boto>=2.49.0', ],  # TODO: drop
+}
+
 
 # Manage requirements
 setup(
@@ -32,7 +39,7 @@ setup(
     description=KEYWORDS,
     long_description=LONG_DESCRIPTION,
     author='radzhome',
-    author_email='radek@radtek.com',
+    author_email='radek@radtek.ca',
     download_url='https://github.com/radzhome/python-service-clients',
     url='https://github.com/radzhome/python-service-clients',
     packages=['service_clients', 'service_clients.aws', 'service_clients.cache', 'service_clients.search'],

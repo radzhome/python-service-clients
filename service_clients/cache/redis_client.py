@@ -11,12 +11,7 @@ CONNECT_TIMEOUT_SECS = 5.0  # Control how long to wait while establishing a conn
 REQUEST_TIMEOUT_SECS = 120.0  # Request socket timeout
 
 
-class RedisClient(object):
-    """
-    Redis connection cache
-    Redis connections are lazy so there really isn't
-    anything to manage here i.e. re-connect
-    """
+class RedisBaseClient(object):
 
     def __init__(self, config=None, connect_timeout_secs=CONNECT_TIMEOUT_SECS,
                  request_timeout_secs=REQUEST_TIMEOUT_SECS):
@@ -74,6 +69,14 @@ class RedisClient(object):
                 raise
 
         return self.write_conn
+
+
+class RedisClient(RedisBaseClient):
+    """
+    Redis connection cache
+    Redis connections are lazy so there really isn't
+    anything to manage here i.e. re-connect
+    """
 
     def clear_cache_ns(self, ns, chunk_size=20000):
         """
