@@ -21,13 +21,12 @@ KEYWORDS = 'Python Service Clients'
 requires = [
     'boto3>=1.9.0,<3.0.0',
     'elasticsearch>=6.3.1,<7.0.0',
-    'redis>=2.10.6,<3.0.0'
+    'redis>=2.10.6,<4.0.0'
 
 ]
 
 extra_require = {
     'rabbit':  ['pika>=1.0.1', ],
-    'boto':  ['boto>=2.49.0', ],  # TODO: drop
 }
 
 
@@ -48,5 +47,6 @@ setup(
     license='BSD',
     classifiers=CLASSIFIERS,
     keywords=KEYWORDS,
-    install_requires=requires
+    install_requires=requires,
+    extras_require=extra_require,
 )
