@@ -2,7 +2,7 @@
 
 Service clients for common aws, cache and search services
 
-### Testing redis, es using local services
+### Testing using local services
 
 1. With docker installed, bring up docker services `docker-compose up -d`
 1. Run tests `cd tests && python3 test_redis_client.py`
