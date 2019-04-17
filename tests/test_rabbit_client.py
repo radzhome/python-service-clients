@@ -6,7 +6,7 @@ import unittest
 
 sys.path.insert(0, '..')
 from service_clients.queue.rabbit_client import RabbitQueue
-from service_clients.queue.rabbit_client import AsyncConsumer
+from service_clients.queue.rabbit_async_client import AsyncConsumer
 
 TEST_QUEUE = 'test.msg_queue.test'
 
@@ -88,7 +88,8 @@ class TestRabbitQueue(unittest.TestCase):
         self.queue.direct_declare(TEST_QUEUE)
         self.queue.publish(TEST_QUEUE, 'this is a test msg')
 
-        self.queue.get_messages(TEST_QUEUE, prefetch_count=1)
+        messages = self.queue.get_messages(TEST_QUEUE, prefetch_count=1)
+        assert len(messages) >= 1
 
     def test_direct_declare1(self):
         assert self.queue.direct_declare(TEST_QUEUE)

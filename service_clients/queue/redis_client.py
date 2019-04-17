@@ -49,6 +49,25 @@ class RedisQueue(RedisBaseClient):
             return False
         return True
 
+    def publish_multiple(self, q_name, data_list):
+        """
+        Publish multiple msg/items to queue.
+        :param q_name: str, queue name
+        :param data_list: list of str, data (message)
+        :return: bool, success
+        """
+        try:
+            # pipe = self.write_connection().pipeline()
+            # for data in data_list:
+            #     # pipe.rpush(q_name, data)  # TODO: * data_list?
+            #     pipe.rpush(q_name, data)  # TODO: * data_list?
+            # pipe.execute()
+            self.write_connection().rpush(q_name, *data_list)
+        except Exception as e:  # pragma: no cover
+            logging.warning("RedisQueue.publish_multiple for queue {}. {}".format(q_name, e))
+            return False
+        return True
+
     def flush_queue(self, q_name):
         """
         Flush a queue to clear work for consumer
@@ -100,11 +119,56 @@ class RedisQueue(RedisBaseClient):
         :param timeout: int, timeout wait seconds (blocking get)
         :return: str, message
         """
-        if timeout:
-            item = self.read_connection().blpop(q_name, timeout=timeout)
+        if timeout is not None:
+            msg = self.read_connection().blpop(q_name, timeout=timeout)
+            if msg:
+                msg = msg[1]
         else:
-            item = self.read_connection().lpop(q_name)
+            msg = self.read_connection().lpop(q_name)  # TODO: Returns single item? or tuple?
 
-        if item:
-            item = item[1]
-        return item
+        return msg
+
+    def get_message_safe(self, q_name, timeout=0, processing_prefix='processing'):
+        """
+        Retrieve a message but also send it to
+        a processing queue for later acking
+        :param q_name: str, queue name
+        :param timeout:
+        :param processing_prefix:
+        :return:
+        """
+        # Too bad blpoplpush does not exist
+        # item = self.read_connection().brpoplpush(q_name, "{}:{}".format(q_name, processing_prefix), timeout=timeout)
+
+        msg = self.get_message(q_name=q_name, timeout=timeout)
+        if msg:
+            self.write_connection().lpush("{}:{}".format(q_name, processing_prefix), msg)
+        return msg
+
+    def ack_message_safe(self, q_name, message, processing_prefix='processing'):
+        """
+        Acknowledge a message has been processed
+        :param q_name: str, queue name
+        :param message: str, message value
+        :param processing_prefix: str, prefix of processing queue name
+        :return: bool, success
+        """
+        self.read_connection().lrem("{}:{}".format(q_name, processing_prefix), -1, message)
+        return True
+
+    def requeue_message_safe(self, q_name, processing_prefix='processing'):
+        """
+        Move unprocessed messages from processing queue
+        to original queue for re-processing
+        :param q_name:
+        :param processing_prefix:
+        :return: bool, success
+        """
+        msgs = self.write_connection().lrange("{}:{}".format(q_name, processing_prefix), 0, -1)  # Get all msgs
+        if msgs:
+            msgs = msgs[::-1]  # Reverse order
+            pipe = self.write_connection().pipeline()
+            pipe.rpush(q_name, *msgs)
+            pipe.ltrim("{}:{}".format(q_name, processing_prefix), 0, -1)  # Cleanup
+            pipe.execute()
+        return True
