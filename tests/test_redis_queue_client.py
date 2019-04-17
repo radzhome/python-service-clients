@@ -164,6 +164,7 @@ class TestRedisQueue(unittest.TestCase):
         message = self.client.get_message(TEST_QUEUE, timeout=10)
         assert message
         assert isinstance(message, bytes)
+        assert message == b'{"test": "data0"}'
 
     def test_message_safe1(self):
         """
@@ -245,6 +246,19 @@ class TestRedisQueue(unittest.TestCase):
 
         # Ensure order is right
         for i in range(num_msgs):
+            message = self.client.get_message(TEST_QUEUE)
+            assert message == bytes('{{"test": "data{}"}}'.format(i).encode('utf-8')), message
+
+    def test_publish_multiple(self):
+        self.client.flush_queue(TEST_QUEUE)
+        msgs = ['{"test": "data0"}', '{"test": "data1"}']
+        success = self.client.publish_multiple(TEST_QUEUE, msgs)
+        assert success
+
+        count = self.client.get_queue_msg_count(TEST_QUEUE)
+        assert count == len(msgs)
+
+        for i in range(len(msgs)):
             message = self.client.get_message(TEST_QUEUE)
             assert message == bytes('{{"test": "data{}"}}'.format(i).encode('utf-8')), message
 

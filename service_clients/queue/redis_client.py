@@ -57,11 +57,6 @@ class RedisQueue(RedisBaseClient):
         :return: bool, success
         """
         try:
-            # pipe = self.write_connection().pipeline()
-            # for data in data_list:
-            #     # pipe.rpush(q_name, data)  # TODO: * data_list?
-            #     pipe.rpush(q_name, data)  # TODO: * data_list?
-            # pipe.execute()
             self.write_connection().rpush(q_name, *data_list)
         except Exception as e:  # pragma: no cover
             logging.warning("RedisQueue.publish_multiple for queue {}. {}".format(q_name, e))
@@ -124,7 +119,7 @@ class RedisQueue(RedisBaseClient):
             if msg:
                 msg = msg[1]
         else:
-            msg = self.read_connection().lpop(q_name)  # TODO: Returns single item? or tuple?
+            msg = self.read_connection().lpop(q_name)
 
         return msg
 
