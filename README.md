@@ -13,7 +13,7 @@ Service clients for common aws, cache and search services
 
 ### Testing aws modules
 
-1. Update keys in test_s3_client.py
+1. Update keys and bucket names in test_s3_client.py
 1. Run tests `cd tests && python3 test_s3_client.py`
-1. Update keys in test_sqs_client.py
+1. Update keys and queue name in test_sqs_client.py
 1. Run tests `cd tests && python3 test_sqs_client.py`

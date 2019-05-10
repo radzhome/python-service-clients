@@ -22,6 +22,8 @@ S3_CONN_PARAMS = {
     'bucket_name': '<test-bucket>'
 }
 
+S3_CUSTOM_BUCKET_NAME = '<some-other-bucket>'  # Make sure bucket exists and is accessible
+
 TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
@@ -73,6 +75,14 @@ class TestS3Client(unittest.TestCase):
         list_result = self.s3_client.list()
         assert isinstance(list_result, list)
 
+    def test_list2(self):
+        list_result = self.s3_client.list(bucket_name=S3_CUSTOM_BUCKET_NAME)
+        assert isinstance(list_result, list)
+
+    def test_list3(self):
+        list_result = self.s3_client.list(bucket_name='non-existent-bucket-name-1234-23203')
+        assert not list_result, list_result
+
     def test_s3_file_write1(self):
         """
         Test writing to s3
@@ -86,21 +96,45 @@ class TestS3Client(unittest.TestCase):
         Test read written file from s3
         """
         result = self.s3_client.read(self.key_name)
-        print(result)
+
         assert result == self.key_contents, "Got {}, {}".format(result, type(result))
 
     def test_s3_file_write3(self):
         """
         Test delete written file from s3
         """
+        self.s3_client.write(key=self.key_name, contents=self.key_contents)
+
         delete_result = self.s3_client.remove(keys=[self.key_name, ])
         assert delete_result
+
+        result = self.s3_client.read(self.key_name)
+        assert not result
+
+    def test_s3_file_write4(self):
+        """
+        Test writing to s3 using
+        custom bucket
+        """
+        result = self.s3_client.write(key=self.key_name, contents=self.key_contents,
+                                      bucket_name=S3_CUSTOM_BUCKET_NAME)
+        assert isinstance(result, dict)
+        assert 'file_name' in result
 
     def test_remove1(self):
         """
         Test delete from s3
         """
         delete_result = self.s3_client.remove(keys=['non-existent-1', 'non-existent-2'])
+        assert delete_result  # Does not care if files are not there, still success
+
+    def test_remove2(self):
+        """
+        Test delete from s3
+        from custom bucket
+        """
+        delete_result = self.s3_client.remove(keys=['non-existent-1', 'non-existent-2'],
+                                              bucket_name=S3_CUSTOM_BUCKET_NAME)
         assert delete_result  # Does not care if files are not there, still success
 
     def test_s3_upload1(self):
@@ -147,6 +181,14 @@ class TestS3Client(unittest.TestCase):
         # Cleanup
         remove_file(destination)
         self.s3_client.remove(keys=[self.txt_key_name, ])
+
+    def test_s3_upload5(self):
+        """
+        Test custom bucket name upload
+        """
+        result = self.s3_client.upload(key=self.jpg_key_name, origin_path=self.test_jpg_filename,
+                                       bucket_name=S3_CUSTOM_BUCKET_NAME)
+        assert result is True
 
 
 if __name__ == '__main__':
