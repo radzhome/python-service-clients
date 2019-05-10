@@ -41,12 +41,13 @@ class S3Client:  # pragma: no cover
         self.connection_attempt = 0
         self.connection = None
         self.bucket = None
-        self.connect()
+        self.connect(run_get_bucket=bool(self.bucket_name))
 
-    def connect(self):
+    def connect(self, run_get_bucket=False):
         """
         Creates object connection to the designated region (self.boto.cli_region).
         The connection is established on the first call for this instance (lazy) and cached.
+        :param run_get_bucket: bool, run (or skip) getting the bucket object
         :return: None
         """
         try:
@@ -56,7 +57,8 @@ class S3Client:  # pragma: no cover
                                              aws_access_key_id=self.access_key_id,
                                              aws_secret_access_key=self.secret_access_key,
                                              config=self.CONN_CONFIG)
-            self.bucket = self._get_bucket()
+            if run_get_bucket:
+                self.bucket = self._get_bucket()
         except Exception as e:
             logging.exception("S3Client.connect failed with params {}, error {}".format(self.config, e))
             if self.connection_attempt >= self.CONN_RETRIES:
@@ -115,8 +117,10 @@ class S3Client:  # pragma: no cover
         :return: str, contents of key
         """
         try:
-            obj = self.connection.Object(bucket_name or self.bucket_name, key)
+            obj = self.connection.Object(key=key, bucket_name=bucket_name or self.bucket_name, )
             contents = obj.get()['Body'].read().decode('utf-8')
+        except UnicodeDecodeError:
+            logging.warning("S3Client.read key cannot be decoded using utf-8, {}".format(key))
         except botocore.exceptions.ClientError as e:
             if e.response['Error']['Code'] == "NoSuchKey":
                 logging.warning("S3Client.read no such key {}".format(key))
@@ -143,7 +147,7 @@ class S3Client:  # pragma: no cover
         """
         output = response = None
         try:
-            response = self.connection.Object(bucket_name or self.bucket_name, key).put(Body=contents)
+            response = self.connection.Object(key=key, bucket_name=bucket_name or self.bucket_name).put(Body=contents)
             output = {
                 'file_name': key,
                 # 'is_new': not k.exists(),
