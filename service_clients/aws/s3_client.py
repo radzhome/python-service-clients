@@ -118,9 +118,13 @@ class S3Client:  # pragma: no cover
         """
         try:
             obj = self.connection.Object(key=key, bucket_name=bucket_name or self.bucket_name, )
-            contents = obj.get()['Body'].read().decode('utf-8')
-        except UnicodeDecodeError:
-            logging.warning("S3Client.read key cannot be decoded using utf-8, {}".format(key))
+            contents = obj.get()['Body'].read()
+
+            try:
+                contents = contents.decode('utf-8')
+            except UnicodeDecodeError:
+                logging.debug("S3Client.read key cannot be decoded using utf-8, leaving raw. {}".format(key))
+
         except botocore.exceptions.ClientError as e:
             if e.response['Error']['Code'] == "NoSuchKey":
                 logging.warning("S3Client.read no such key {}".format(key))
